@@ -1,0 +1,71 @@
+rule '.tar.gz' do |t|
+  fetch $conf["tarballs"][t.name]["url"], t.name
+end
+
+rule '.unpack' => '.tar.gz' do |t|
+  tar_xfz t.prerequisites.first, 1,
+          File.basename(t.prerequisites.first, '.tar.gz')
+  touch t.name
+end
+
+# compiles vcpkg.exe
+file 'vcpkg.configure' => 'vcpkg.unpack' do |t|
+  cd 'vcpkg' do
+    sh 'powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+       File.join('scripts', 'bootstrap.ps1'), '-disableMetrics'
+  end
+  touch t.name
+end
+
+# compiles all the deps
+file 'vcpkg.deps' => 'vcpkg.configure' do |t|
+  cd 'vcpkg' do
+    sh './vcpkg', '--triplet', 'x64-windows', 'install',
+       'openssl', 'readline', 'zlib'
+  end
+  touch t.name
+end
+
+
+
+require 'open-uri'
+require 'rubygems/package'
+require 'digest/sha1'
+require 'yaml'
+
+$conf = YAML.load_file(ENV['conf'] || File.join(__dir__, 'conf.yaml'))
+
+# openssl for windows doesn't use the windows certificate store!
+#
+# wget https://curl.haxx.se/ca/cacert.pem
+ENV['SSL_CERT_FILE'] = File.join __dir__, 'cacert.pem'
+
+def fetch from, to
+  puts "fetch #{from} to `#{to}`" if verbose
+  URI.open(from) do |io|
+    File.open(to, 'wb') { |f| f.write io.read }
+  end
+  if Digest::SHA1.hexdigest(File.binread to) != $conf["tarballs"][to]["sha1"]
+    fail "sha1 doesn't match"
+  end
+end
+
+def tar_xfz archive, strip_componenets, to
+  puts "unpack #{archive} to `#{to}`" if verbose
+  File.open(archive, 'rb') do |file|
+    Zlib::GzipReader.wrap(file) do |gz|
+      Gem::Package::TarReader.new(gz) do |tar|
+        tar.each do |entry|
+          next if entry.directory?
+
+          path = entry.full_name.split(File::SEPARATOR)[strip_componenets..-1]
+          if path.size > 0
+            path = File.join to, path
+            FileUtils.mkdir_p File.dirname path
+            File.open(path, 'wb') { |f| f.write entry.read }
+          end
+        end
+      end
+    end
+  end
+end
