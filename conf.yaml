@@ -1,0 +1,7 @@
+tarballs:
+  "vcpkg.tar.gz":
+    url: https://github.com/microsoft/vcpkg/archive/2020.06.tar.gz
+    sha1: 6be2cccbfa1e10958ead0fb60a11a3f1e07b06aa
+  "ruby.tar.gz":
+    url: https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.1.tar.gz
+    sha1: 76e25fce50a87f76a3ccd6d0fdd9b7c792400249
