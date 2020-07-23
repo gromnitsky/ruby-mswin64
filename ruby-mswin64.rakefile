@@ -8,7 +8,13 @@ rule '.unpack' => '.tar.gz' do |t|
   touch t.name
 end
 
-# compiles vcpkg.exe
+# file 'ruby.unpack' => 'ruby.tar.gz' do |t|
+#   tar_xfz t.prerequisites.first, 0, "1"
+#   touch t.name
+# end
+
+
+# compile vcpkg.exe
 file 'vcpkg.configure' => 'vcpkg.unpack' do |t|
   cd 'vcpkg' do
     sh 'powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
@@ -17,11 +23,28 @@ file 'vcpkg.configure' => 'vcpkg.unpack' do |t|
   touch t.name
 end
 
-# compiles all the deps
+# compile all the deps
 file 'vcpkg.deps' => 'vcpkg.configure' do |t|
   cd 'vcpkg' do
     sh './vcpkg', '--triplet', 'x64-windows', 'install',
        'openssl', 'readline', 'zlib'
+  end
+  touch t.name
+end
+
+# compile ruby
+file 'ruby.build' => ['vcpkg.deps', 'ruby.unpack'] do |t|
+  ENV['INCLUDE'] += ";"+wj(__dir__, 'vcpkg', 'installed', 'x64-windows', 'include')
+  ENV['LIB'] += ";"+wj(__dir__, 'vcpkg', 'installed', 'x64-windows', 'lib')
+  ENV['PATH'] += ";"+wj(__dir__, 'vcpkg', 'installed', 'x64-windows', 'bin')
+
+  cd 'ruby' do
+    sh 'win32/configure.bat',
+       '--prefix='+wj(__dir__, "_out/ruby-#{$conf["ver"]}")
+    sh "nmake"
+    sh "nmake install"
+    cp_r Dir.glob(File.join __dir__, 'vcpkg/installed/x64-windows/bin/*.dll'),
+         File.join(__dir__, "_out/ruby-#{$conf["ver"]}/bin/")
   end
   touch t.name
 end
@@ -63,9 +86,13 @@ def tar_xfz archive, strip_componenets, to
             path = File.join to, path
             FileUtils.mkdir_p File.dirname path
             File.open(path, 'wb') { |f| f.write entry.read }
+            File.utime entry.header.mtime, entry.header.mtime, path
           end
         end
       end
     end
   end
 end
+
+
+def wj *rest; rest.map {|v| v.split(File::SEPARATOR) }.flatten.join '\\'; end

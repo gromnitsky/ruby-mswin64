@@ -5,3 +5,4 @@ tarballs:
   "ruby.tar.gz":
     url: https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.1.tar.gz
     sha1: 76e25fce50a87f76a3ccd6d0fdd9b7c792400249
+ver: 2.7.1p83
