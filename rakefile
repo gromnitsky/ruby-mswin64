@@ -14,6 +14,7 @@ rule '.unpack' => '.tar.gz' do |t|
 end
 
 # compile vcpkg.exe
+task "vcpkg-configure" => out('vcpkg.configure')
 file out('vcpkg.configure') => out('vcpkg.unpack') do |t|
   cd out('vcpkg') do
     sh 'powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
