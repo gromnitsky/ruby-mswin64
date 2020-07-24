@@ -60,6 +60,10 @@ end
 
 task :default => zip
 
+task :upload => zip do |t|
+  sh 'scp', t.prerequisites.first, 'gromnitsky@web.sourceforge.net:/home/user-web/gromnitsky/htdocs/ruby/mswin64/'
+end
+
 
 
 require 'open-uri'
