@@ -2,7 +2,7 @@
 
 Produce a native Windows build of Ruby using VS2019.
 
-Outputs a portable .zip that requires only small [MS Visual C++
+Outputs a portable .zip that requires only [MS Visual C++
 Redistributable][] pkg on a target machine.
 
 [MS Visual C++ Redistributable]: https://aka.ms/vs/16/release/vc_redist.x64.exe
