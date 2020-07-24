@@ -1,22 +1,24 @@
+require 'yaml'
+
+$conf = YAML.load_file(ENV['conf'] || File.join(__dir__, 'conf.yaml'))
+$out = ENV['out'] || "_out/ruby-#{$conf["ver"]}"
+
+def out file; File.join $out, file; end
+
+#task :default => [out('ruby.build')]
+
 rule '.tar.gz' do |t|
-  fetch $conf["tarballs"][t.name]["url"], t.name
+  fetch $conf["tarballs"][File.basename t.name]["url"], t.name
 end
 
 rule '.unpack' => '.tar.gz' do |t|
-  tar_xfz t.prerequisites.first, 1,
-          File.basename(t.prerequisites.first, '.tar.gz')
+  tar_xfz t.prerequisites.first, 1, t.prerequisites.first.sub(/.tar.gz$/, '')
   touch t.name
 end
 
-# file 'ruby.unpack' => 'ruby.tar.gz' do |t|
-#   tar_xfz t.prerequisites.first, 0, "1"
-#   touch t.name
-# end
-
-
 # compile vcpkg.exe
-file 'vcpkg.configure' => 'vcpkg.unpack' do |t|
-  cd 'vcpkg' do
+file out('vcpkg.configure') => out('vcpkg.unpack') do |t|
+  cd out('vcpkg') do
     sh 'powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
        File.join('scripts', 'bootstrap.ps1'), '-disableMetrics'
   end
@@ -24,8 +26,8 @@ file 'vcpkg.configure' => 'vcpkg.unpack' do |t|
 end
 
 # compile all the deps
-file 'vcpkg.deps' => 'vcpkg.configure' do |t|
-  cd 'vcpkg' do
+file out('vcpkg.deps') => out('vcpkg.configure') do |t|
+  cd out('vcpkg') do
     sh './vcpkg', '--triplet', 'x64-windows', 'install',
        'openssl', 'readline', 'zlib'
   end
@@ -33,19 +35,20 @@ file 'vcpkg.deps' => 'vcpkg.configure' do |t|
 end
 
 # compile ruby
-file 'ruby.build' => ['vcpkg.deps', 'ruby.unpack'] do |t|
-  ENV['INCLUDE'] += ";"+wj(__dir__, 'vcpkg', 'installed', 'x64-windows', 'include')
-  ENV['LIB'] += ";"+wj(__dir__, 'vcpkg', 'installed', 'x64-windows', 'lib')
-  ENV['PATH'] += ";"+wj(__dir__, 'vcpkg', 'installed', 'x64-windows', 'bin')
+file out('ruby.build') => [out('vcpkg.deps'), out('ruby.unpack')] do |t|
+  ENV['INCLUDE'] += ";"+wj(out 'vcpkg/installed/x64-windows/include')
+  ENV['LIB'] += ";"+wj(out 'vcpkg/installed/x64-windows/lib')
+  ENV['PATH'] += ";"+wj(out 'vcpkg/installed/x64-windows/bin')
+  prefix = wj(out "ruby-#{$conf["ver"]}")
 
-  cd 'ruby' do
+  cd out('ruby') do
     sh 'win32/configure.bat',
-       '--prefix='+wj(__dir__, "_out/ruby-#{$conf["ver"]}")
+       '--prefix='+prefix
     sh "nmake"
     sh "nmake install"
-    cp_r Dir.glob(File.join __dir__, 'vcpkg/installed/x64-windows/bin/*.dll'),
-         File.join(__dir__, "_out/ruby-#{$conf["ver"]}/bin/")
   end
+  cp_r Dir.glob(File.join out('vcpkg/installed/x64-windows/bin'), '*.dll'),
+       File.join(prefix, 'bin/')
   touch t.name
 end
 
@@ -54,9 +57,6 @@ end
 require 'open-uri'
 require 'rubygems/package'
 require 'digest/sha1'
-require 'yaml'
-
-$conf = YAML.load_file(ENV['conf'] || File.join(__dir__, 'conf.yaml'))
 
 # openssl for windows doesn't use the windows certificate store!
 #
@@ -66,9 +66,10 @@ ENV['SSL_CERT_FILE'] = File.join __dir__, 'cacert.pem'
 def fetch from, to
   puts "fetch #{from} to `#{to}`" if verbose
   URI.open(from) do |io|
+    mkdir_p File.dirname to
     File.open(to, 'wb') { |f| f.write io.read }
   end
-  if Digest::SHA1.hexdigest(File.binread to) != $conf["tarballs"][to]["sha1"]
+  if Digest::SHA1.hexdigest(File.binread to) != $conf["tarballs"][File.basename to]["sha1"]
     fail "sha1 doesn't match"
   end
 end
@@ -95,4 +96,4 @@ def tar_xfz archive, strip_componenets, to
 end
 
 
-def wj *rest; rest.map {|v| v.split(File::SEPARATOR) }.flatten.join '\\'; end
+def wj *rest; File.absolute_path(File.join(*rest)).split('/').join '\\'; end
