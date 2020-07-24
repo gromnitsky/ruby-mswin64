@@ -1,11 +1,8 @@
 require 'yaml'
 
 $conf = YAML.load_file(ENV['conf'] || File.join(__dir__, 'conf.yaml'))
-$out = ENV['out'] || "_out/ruby-#{$conf["ver"]}"
-
-def out file; File.join $out, file; end
-
-#task :default => [out('ruby.build')]
+def out f; File.join (ENV['out'] || "_out/ruby-#{$conf["ver"]}"), f; end
+install_prefix = out "ruby-#{$conf["ver"]}"
 
 rule '.tar.gz' do |t|
   fetch $conf["tarballs"][File.basename t.name]["url"], t.name
@@ -39,7 +36,7 @@ file out('ruby.build') => [out('vcpkg.deps'), out('ruby.unpack')] do |t|
   ENV['INCLUDE'] += ";"+wj(out 'vcpkg/installed/x64-windows/include')
   ENV['LIB'] += ";"+wj(out 'vcpkg/installed/x64-windows/lib')
   ENV['PATH'] += ";"+wj(out 'vcpkg/installed/x64-windows/bin')
-  prefix = wj(out "ruby-#{$conf["ver"]}")
+  prefix = wj install_prefix
 
   cd out('ruby') do
     sh 'win32/configure.bat',
@@ -51,6 +48,16 @@ file out('ruby.build') => [out('vcpkg.deps'), out('ruby.unpack')] do |t|
        File.join(prefix, 'bin/')
   touch t.name
 end
+
+zip = install_prefix + "-#{$conf["release"]}.zip"
+file zip => out('ruby.build') do |t|
+  rm_f t.name
+  sh 'powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+     '-Command', 'Compress-Archive', '-Path', install_prefix,
+     '-DestinationPath', t.name
+end
+
+task :default => zip
 
 
 
