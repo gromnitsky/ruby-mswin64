@@ -1,6 +1,6 @@
 require 'yaml'
 
-$conf = YAML.load_file(ENV['conf'] || File.join(__dir__, 'conf.yaml'))
+$conf = YAML.load_file(ENV['conf'] || File.join(__dir__, 'default.yaml'))
 def out f; File.join (ENV['out'] || "_out/ruby-#{$conf["ver"]}"), f; end
 install_prefix = out "ruby-#{$conf["ver"]}"
 
