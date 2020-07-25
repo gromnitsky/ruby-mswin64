@@ -50,8 +50,16 @@ file out('ruby.build') => [out('vcpkg.deps'), out('ruby.unpack')] do |t|
   touch t.name
 end
 
+# copy man pages in text fmt & samples
+file out('ruby.build.post') => out('ruby.build') do |t|
+  rm_rf File.join install_prefix, 'share/man'
+  rm_rf File.join install_prefix, 'share/doc'
+  cp_r out('ruby/sample'), install_prefix
+  touch t.name
+end
+
 zip = install_prefix + "-#{$conf["release"]}.zip"
-file zip => out('ruby.build') do |t|
+file zip => out('ruby.build.post') do |t|
   rm_f t.name
   sh 'powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
      '-Command', 'Compress-Archive', '-Path', install_prefix,
@@ -76,13 +84,14 @@ rule(/#{out()}.+\.iss$/ => [
 end
 
 setup = install_prefix + "-#{$conf["release"]}.exe"
-file setup => [out('main.iss'), out('modpath.iss'), out('license.txt')] do |t|
-  sh "iscc", '/Qp', '/F'+File.basename(t.name, '.exe'), t.prerequisites.first
+file setup => [out('main.iss'), out('modpath.iss'),
+               out('ruby.build.post'), out('license.txt')] do |t|
+  sh "iscc", '/Q', '/F'+File.basename(t.name, '.exe'), t.prerequisites.first
 end
 task :setup => setup
 
 task :upload => [zip, setup] do |t|
-  sh 'echo', 'scp', t.prerequisites.join(' '), 'gromnitsky@web.sourceforge.net:/home/user-web/gromnitsky/htdocs/ruby/mswin64/'
+  sh 'scp', t.prerequisites.join(' '), 'gromnitsky@web.sourceforge.net:/home/user-web/gromnitsky/htdocs/ruby/mswin64/'
 end
 
 
