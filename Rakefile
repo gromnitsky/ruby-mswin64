@@ -59,6 +59,11 @@ file zip => out('ruby.build') do |t|
 end
 task :default => zip
 
+file out('license.txt') => ['setup/license_prefix.txt', out('ruby.unpack')] do |t|
+  ENV['out'] = out()
+  sh "erb -T- #{t.prerequisites.first} > #{t.name}"
+end
+
 # transform inno setup files
 #
 # and people say Make has a cryptic syntax
@@ -71,7 +76,7 @@ rule(/#{out()}.+\.iss$/ => [
 end
 
 setup = install_prefix + "-#{$conf["release"]}.exe"
-file setup => [out('main.iss'), out('modpath.iss')] do |t|
+file setup => [out('main.iss'), out('modpath.iss'), out('license.txt')] do |t|
   sh "iscc", '/Qp', '/F'+File.basename(t.name, '.exe'), t.prerequisites.first
 end
 task :setup => setup

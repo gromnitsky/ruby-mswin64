@@ -1,0 +1,11 @@
+Warning! This installer is in no way affiliated with the Ruby Core
+team.
+
+The following is the original license of the Ruby source code
+distribution this installer encompasses.
+
+$ cat BSDL
+<%= File.read ENV['out']+'ruby/BSDL' -%>
+
+$ cat COPYING
+<%= File.read ENV['out']+'ruby/COPYING' -%>

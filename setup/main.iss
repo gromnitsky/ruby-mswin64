@@ -27,8 +27,8 @@ PrivilegesRequired=lowest
 DefaultDirName={autopf}\ruby-mswin64
 ;; start menu dir
 DefaultGroupName=ruby-mswin64
-LicenseFile=ruby\BSDL
-;Compression=none
+LicenseFile=license.txt
+Compression=none
 ;; Tell Windows Explorer to reload the environment after we modified env vars
 ChangesEnvironment=yes
 ;; put .exe alongside .iss
@@ -43,7 +43,7 @@ Name: modifypath; Description: &Add ruby.exe, irb.cmd, &&c to PATH.
 Name: SSL_CERT_FILE; Description: &Install the Mozilla CA certificate store. This will NOT interfere with the Windows certificate store. If you uncheck this, expect certificate check errors when opening a TLS connection in Ruby.
 
 [Components]
-Name: "program"; Description: "Program Files"; Types: full custom; Flags: fixed
+Name: "program"; Description: "Essentials"; Types: full custom; Flags: fixed
 Name: "headers"; Description: "Headers"; Types: full custom
 Name: "help"; Description: "CLI & API reference"; Types: full custom
 
@@ -52,7 +52,7 @@ Source: "<%= prefix('lib/*') %>"; DestDir: "{app}/lib"; Flags: recursesubdirs; C
 Source: "<%= ENV['src'] %>/cacert.pem"; DestDir: "{app}\etc"; Components: program; Tasks: SSL_CERT_FILE
 Source: "<%= prefix('bin/*') %>"; DestDir: "{app}/bin"; Flags: recursesubdirs; Components: program
 Source: "<%= prefix('include/*') %>"; DestDir: "{app}/include"; Flags: recursesubdirs; Components: headers
-Source: "<%= prefix('share/man/*') %>"; DestDir: "{app}/share/man"; Flags: recursesubdirs; Components: help
+Source: "<%= prefix('share/*') %>"; DestDir: "{app}/share"; Flags: recursesubdirs; Components: help
 
 [Registry]
 Root: HKCU; Subkey: "Environment"; ValueType:string; ValueName: "SSL_CERT_FILE"; ValueData: "{app}\etc\cacert.pem"; Flags: uninsdeletevalue; Tasks: SSL_CERT_FILE
