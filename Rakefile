@@ -1,7 +1,7 @@
 require 'yaml'
 
 $conf = YAML.load_file(ENV['conf'] || File.join(__dir__, 'default.yaml'))
-def out f; File.join (ENV['out'] || "_out/ruby-#{$conf["ver"]}"), f; end
+def out f=''; File.join (ENV['out'] || "_out/ruby-#{$conf["ver"]}"), f; end
 install_prefix = out "ruby-#{$conf["ver"]}"
 
 rule '.tar.gz' do |t|
@@ -57,11 +57,27 @@ file zip => out('ruby.build') do |t|
      '-Command', 'Compress-Archive', '-Path', install_prefix,
      '-DestinationPath', t.name
 end
-
 task :default => zip
 
-task :upload => zip do |t|
-  sh 'scp', t.prerequisites.first, 'gromnitsky@web.sourceforge.net:/home/user-web/gromnitsky/htdocs/ruby/mswin64/'
+# transform inno setup files
+#
+# and people say Make has a cryptic syntax
+rule(/#{out()}.+\.iss$/ => [
+       proc {|dest| 'setup/' + File.basename(dest) }
+]) do |t|
+  mkdir_p File.dirname t.name
+  ENV['src'] = __dir__
+  sh "erb #{t.source} > #{t.name}"
+end
+
+setup = install_prefix + "-#{$conf["release"]}.exe"
+file setup => [out('main.iss'), out('modpath.iss')] do |t|
+  sh "iscc", '/Qp', '/F'+File.basename(t.name, '.exe'), t.prerequisites.first
+end
+task :setup => setup
+
+task :upload => [zip, setup] do |t|
+  sh 'echo', 'scp', t.prerequisites.join(' '), 'gromnitsky@web.sourceforge.net:/home/user-web/gromnitsky/htdocs/ruby/mswin64/'
 end
 
 
