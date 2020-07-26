@@ -13,6 +13,10 @@ rule '.unpack' => '.tar.gz' do |t|
   touch t.name
 end
 
+file out('vc_redist.x64.exe') do |t|
+  fetch $conf["tarballs"][File.basename t.name]["url"], t.name
+end
+
 # compile vcpkg.exe
 task "vcpkg-configure" => out('vcpkg.configure')
 file out('vcpkg.configure') => out('vcpkg.unpack') do |t|
@@ -84,7 +88,7 @@ rule(/#{out()}.+\.iss$/ => [
 end
 
 setup = install_prefix + "-#{$conf["release"]}.exe"
-file setup => [out('main.iss'), out('modpath.iss'),
+file setup => [out('main.iss'), out('modpath.iss'), out('vc_redist.x64.exe'),
                out('ruby.build.post'), out('license.txt')] do |t|
   sh "iscc", '/Q', '/F'+File.basename(t.name, '.exe'), t.prerequisites.first
 end

@@ -4,15 +4,16 @@
 require 'yaml'
 $conf = YAML.load_file(ENV['conf'] || File.join('default.yaml'))
 def prefix f; File.join "ruby-#{$conf['ver']}", f; end
+ver = $conf["ver"] +'-'+ $conf["release"].to_s
 ver_mm = $conf["ver"].split('.')[0..-2].join '.'
 ver_mm0 = ver_mm + '.0'
 %>
 
-#define AppId "com.github.gromnitsky.ruby-mswin64"
+#define AppId "com.github.gromnitsky.ruby-mswin64-<%= ver %>"
 
 [Setup]
 AppName=ruby-mswin64
-AppVersion=<%= $conf["ver"] +'-'+ $conf["release"].to_s %>
+AppVersion=<%= ver %>
 AppPublisherURL=https://github.com/gromnitsky/ruby-mswin64
 ;; windows 7 sp1
 MinVersion=6.1.7601
@@ -24,11 +25,12 @@ WizardSizePercent=120,120
 
 PrivilegesRequired=lowest
 ;; installation dir
-DefaultDirName={autopf}\ruby-mswin64
+DefaultDirName={autopf}\ruby-mswin64-<%= ver %>
 ;; start menu dir
-DefaultGroupName=ruby-mswin64
+DefaultGroupName=ruby-mswin64 <%= ver %>
+DisableProgramGroupPage=yes
 LicenseFile=license.txt
-;Compression=none
+Compression=<%= ENV['compression'] || 'lzma2/max' %>
 ;; Tell Windows Explorer to reload the environment after we modified env vars
 ChangesEnvironment=yes
 ;; put .exe alongside .iss
@@ -48,12 +50,18 @@ Name: "headers"; Description: "Headers"; Types: full custom
 Name: "help"; Description: "API reference & samples"; Types: full custom
 
 [Files]
+Source: "license.txt"; DestDir: "{app}"; Components: program
 Source: "<%= prefix('lib/*') %>"; DestDir: "{app}/lib"; Flags: recursesubdirs; Components: program
 Source: "<%= ENV['src'] %>/cacert.pem"; DestDir: "{app}\etc"; Components: program; Tasks: SSL_CERT_FILE
 Source: "<%= prefix('bin/*') %>"; DestDir: "{app}/bin"; Flags: recursesubdirs; Components: program
 Source: "<%= prefix('include/*') %>"; DestDir: "{app}/include"; Flags: recursesubdirs; Components: headers
 Source: "<%= prefix('share/*') %>"; DestDir: "{app}/share"; Flags: recursesubdirs; Components: help
 Source: "<%= prefix('sample/*') %>"; DestDir: "{app}/sample"; Flags: recursesubdirs; Components: help
+Source: "vc_redist.x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall
+
+[Run]
+Filename: {tmp}\vc_redist.x64.exe; Parameters: "/passive"; \
+          StatusMsg: "Installing MS Visual C++ Redistributable..."
 
 [Registry]
 Root: HKCU; Subkey: "Environment"; ValueType:string; ValueName: "SSL_CERT_FILE"; ValueData: "{app}\etc\cacert.pem"; Flags: uninsdeletevalue; Tasks: SSL_CERT_FILE
@@ -82,7 +90,7 @@ begin
   Result := True;
   if RegKeyExists(HKEY_CURRENT_USER, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{#AppId}_is1') then
   begin
-    MsgBox('The application has been already installed.' + #13#10 + 'If you are upgrading, remove the old version first.', mbCriticalError, MB_OK);
+    MsgBox('The application has been already installed.', mbCriticalError, MB_OK);
     Result := False;
   end;
 end;

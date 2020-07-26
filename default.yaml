@@ -5,5 +5,8 @@ tarballs:
   "ruby.tar.gz":
     url: https://cache.ruby-lang.org/pub/ruby/2.7/ruby-2.7.1.tar.gz
     sha1: 76e25fce50a87f76a3ccd6d0fdd9b7c792400249
+  "vc_redist.x64.exe":
+    url: https://aka.ms/vs/16/release/vc_redist.x64.exe
+    sha1: 837a49f9eaacda7c077a8bbea149a52d766b81c0
 ver: 2.7.1p83
 release: 2
