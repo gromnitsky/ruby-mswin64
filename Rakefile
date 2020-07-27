@@ -8,8 +8,19 @@ rule '.tar.gz' do |t|
   fetch $conf["tarballs"][File.basename t.name]["url"], t.name
 end
 
+rule '.zip' do |t|
+  fetch $conf["tarballs"][File.basename t.name]["url"], t.name
+end
+
 rule '.unpack' => '.tar.gz' do |t|
   tar_xfz t.prerequisites.first, 1, t.prerequisites.first.sub(/.tar.gz$/, '')
+  touch t.name
+end
+
+rule '.unzip' => '.zip' do |t|
+  sh 'powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
+     '-Command', 'Expand-Archive', '-Path', t.prerequisites.first,
+     '-DestinationPath', out()
   touch t.name
 end
 
@@ -54,11 +65,23 @@ file out('ruby.build') => [out('vcpkg.deps'), out('ruby.unpack')] do |t|
   touch t.name
 end
 
-# copy man pages in text fmt & samples
-file out('ruby.build.post') => out('ruby.build') do |t|
+# copy samples; convert man pages to html
+file out('ruby.build.post') => [out('ruby.build'), out('mdocml.unzip')] do |t|
   rm_rf File.join install_prefix, 'share/man'
   rm_rf File.join install_prefix, 'share/doc'
   cp_r out('ruby/sample'), install_prefix
+
+  # the reason this is not a rule-based, but a stupid loop, is that
+  # after first run, the ruby src is not downloaded yet, hence rake
+  # won't find any .1 files
+  to = File.join(install_prefix, 'man')
+  mkdir_p to
+  ENV['PATH'] += ';'+out('mdocml-1.13.1-win32-embedeo-02/bin')
+  Dir.glob(out('ruby/man/*.[1-9]')).each do |f|
+    next if f =~ /goruby/
+    sh "mandoc -Thtml -Ostyle=man.css #{f} > #{File.join to, File.basename(f)+'.html' }"
+  end
+  cp 'man.css', to
   touch t.name
 end
 
@@ -84,6 +107,7 @@ rule(/#{out()}.+\.iss$/ => [
 ]) do |t|
   mkdir_p File.dirname t.name
   ENV['src'] = __dir__
+  ENV['out'] = out()
   sh "erb #{t.source} > #{t.name}"
 end
 

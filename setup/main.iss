@@ -47,7 +47,7 @@ Name: SSL_CERT_FILE; Description: &Install the Mozilla CA certificate store. Thi
 [Components]
 Name: "program"; Description: "Essentials"; Types: full custom; Flags: fixed
 Name: "headers"; Description: "Headers"; Types: full custom
-Name: "help"; Description: "API reference & samples"; Types: full custom
+Name: "help"; Description: "API reference, man pages, samples"; Types: full custom
 
 [Files]
 Source: "license.txt"; DestDir: "{app}"; Components: program
@@ -57,10 +57,11 @@ Source: "<%= prefix('bin/*') %>"; DestDir: "{app}/bin"; Flags: recursesubdirs; C
 Source: "<%= prefix('include/*') %>"; DestDir: "{app}/include"; Flags: recursesubdirs; Components: headers
 Source: "<%= prefix('share/*') %>"; DestDir: "{app}/share"; Flags: recursesubdirs; Components: help
 Source: "<%= prefix('sample/*') %>"; DestDir: "{app}/sample"; Flags: recursesubdirs; Components: help
-Source: "vc_redist.x64.exe"; DestDir: {tmp}; Flags: deleteafterinstall
+Source: "<%= prefix('man/*') %>"; DestDir: "{app}/man"; Flags: recursesubdirs; Components: help
+Source: "vc_redist.x64.exe"; DestDir: {app}; Flags: nocompression
 
 [Run]
-Filename: {tmp}\vc_redist.x64.exe; Parameters: "/passive"; \
+Filename: {app}\vc_redist.x64.exe; Parameters: "/passive"; \
           StatusMsg: "Installing MS Visual C++ Redistributable..."
 
 [Registry]
@@ -69,17 +70,19 @@ Root: HKCU; Subkey: "Environment"; ValueType:string; ValueName: "SSL_CERT_FILE";
 [Icons]
 Name: "{group}\stdlib"; Filename: "{app}\lib\ruby"
 Name: "{group}\samples"; Filename: "{app}\sample"; Components: help
+;; each man page is a separate shortcut
+<% Dir.glob(File.join ENV['out'], prefix('man/*.html')).each do |f| %>
+Name: "{group}\man\<%= File.basename f, '.html' %>"; Filename: "{app}\man\<%= File.basename f %>"; Components: help
+<% end %>
 Name: "{group}\Interactive Ruby console (irb)"; Filename: "{app}\bin\irb.cmd"; WorkingDir: {%USERPROFILE}
 Name: "{group}\API reference console (ri)"; Filename: "{app}\bin\ri.cmd"
-Name: "{group}\Reddit"; Filename: https://old.reddit.com/r/ruby/
-Name: "{group}\doc\Official API Documentation"; Filename: https://docs.ruby-lang.org/en/<%= ver_mm0 %>/
-Name: "{group}\doc\Bundler"; Filename: https://bundler.io/docs.html
-Name: "{group}\doc\Rakefile format"; Filename: https://github.com/ruby/rake/blob/master/doc/rakefile.rdoc
-Name: "{group}\doc\minitest"; Filename: http://docs.seattlerb.org/minitest/
-Name: "{group}\doc\Changelog"; Filename: https://rubyreferences.github.io/rubychanges/<%= ver_mm %>.html
-Name: "{group}\doc\man ruby"; Filename: https://manpages.debian.org/unstable/ruby/ruby.1.en.html
-Name: "{group}\doc\man irb"; Filename: https://manpages.debian.org/unstable/ruby/irb.1.en.html
-Name: "{group}\doc\man erb"; Filename: https://manpages.debian.org/unstable/ruby/erb.1.en.html
+Name: "{group}\web\Bundler"; Filename: https://bundler.io/docs.html
+Name: "{group}\web\Changelog"; Filename: https://rubyreferences.github.io/rubychanges/<%= ver_mm %>.html
+Name: "{group}\web\Rakefile format"; Filename: https://github.com/ruby/rake/blob/master/doc/rakefile.rdoc
+Name: "{group}\web\Reddit"; Filename: https://old.reddit.com/r/ruby/
+Name: "{group}\web\Rubyfu"; Filename: https://rubyfu.net/
+Name: "{group}\web\The official API documentation"; Filename: https://docs.ruby-lang.org/en/<%= ver_mm0 %>/
+Name: "{group}\web\minitest"; Filename: http://docs.seattlerb.org/minitest/
 
 [Code]
 // pascal! in 2020! *weeps bitterly*

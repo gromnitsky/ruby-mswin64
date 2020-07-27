@@ -8,5 +8,8 @@ tarballs:
   "vc_redist.x64.exe":
     url: https://aka.ms/vs/16/release/vc_redist.x64.exe
     sha1: 837a49f9eaacda7c077a8bbea149a52d766b81c0
+  "mdocml.zip":
+    url: https://embedeo.org/ws/doc/man_windows/mdocml-1.13.1-win32-embedeo-02.zip
+    sha1: 3024816df0e66393f54542b81c06af137f8f5f24
 ver: 2.7.1p83
-release: 2
+release: 3
