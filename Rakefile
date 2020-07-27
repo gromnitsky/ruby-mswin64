@@ -103,7 +103,7 @@ end
 #
 # and people say Make has a cryptic syntax
 rule(/#{out()}.+\.iss$/ => [
-       proc {|dest| 'setup/' + File.basename(dest) }
+       proc {|dest| 'setup/' + File.basename(dest) }, out('ruby.build.post')
 ]) do |t|
   mkdir_p File.dirname t.name
   ENV['src'] = __dir__
