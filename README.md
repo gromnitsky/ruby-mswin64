@@ -3,9 +3,14 @@
 Produce a native Windows build of Ruby using VS2019.
 
 Outputs a portable .zip that requires only [MS Visual C++
-Redistributable][] pkg on a target machine.
+Redistributable][] pkg on a target machine or an installer that
+integrates the redist pkg, sets the user's path, &c.
+
+**Achtung!** If you need to run Rails, do not use this, use builds
+from [RubyInstaller][] project!
 
 [MS Visual C++ Redistributable]: https://aka.ms/vs/16/release/vc_redist.x64.exe
+[RubyInstaller]: https://rubyinstaller.org/
 
 The build does **not** use msys2/mingw/cygwin or wsl.
 
@@ -13,10 +18,12 @@ Examples: http://gromnitsky.users.sourceforge.net/ruby/mswin64/
 
 ## Reqs
 
-* Win7 x64
-* VS2019
-* Ruby (testes w/ 2.7.1, grab a zip from the link above, unpack it
-  somewhere & add its `bin` dir to PATH)
+* Win7 sp1 x64 or newer.
+* VS 2019 (the 'community' edition will suffice)
+* Ruby (grab a zip from the link above, unpack it somewhere & add its
+  `bin` dir to PATH)
+* `scoop install inno-setup` (optional, only if you plan making an
+  installer)
 
 ## Compilation
 
@@ -27,12 +34,15 @@ Examples: http://gromnitsky.users.sourceforge.net/ruby/mswin64/
 It'll download vcpkg, build several deps, then download the ruby
 tarball & compile it.
 
+To create an installer, type `rake setup`.
+
 The results should be in `_out` dir, e.g.,
 
 * `_out/ruby-2.7.1p83/ruby-2.7.1p83` -- a final portable Ruby
   installation;
 * `_out/ruby-2.7.1p83/ruby-2.7.1p83-1.zip` -- the same but as an
   archive.
+* `_out/ruby-2.7.1p83/ruby-2.7.1p83-1.exe` -- w00t
 
 ## Caveats
 
@@ -57,7 +67,7 @@ The results should be in `_out` dir, e.g.,
 ## Hints
 
 * If you plan to distribute it as a part of your app, you may safely
-  remove `include` & `share` dirs to greatly save space.
+  leave only `bin` & `dir` dirs to greatly save space.
 
 * Run `gem env` to see where your gems are installed. By default they
   are downloaded to `$installation/lib/ruby/gems/2.7.0/`, thus run
