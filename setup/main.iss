@@ -42,6 +42,7 @@ Name: "custom"; Description: "Custom installation"; Flags: iscustom
 
 [Tasks]
 Name: modifypath; Description: &Add ruby.exe, irb.cmd, &&c to PATH.
+Name: RUBYOPT; Description: &Enable UTF-8 by default for `Encoding.default_external` via setting RUBYOPT env var to `-Eutf-8` (highly recomended).
 Name: SSL_CERT_FILE; Description: &Install the Mozilla CA certificate store. This will NOT interfere with the Windows certificate store. If you uncheck this, expect certificate check errors when opening a TLS connection in Ruby.
 
 [Components]
@@ -66,6 +67,7 @@ Filename: {app}\vc_redist.x64.exe; Parameters: "/passive"; \
 
 [Registry]
 Root: HKCU; Subkey: "Environment"; ValueType:string; ValueName: "SSL_CERT_FILE"; ValueData: "{app}\etc\cacert.pem"; Flags: uninsdeletevalue; Tasks: SSL_CERT_FILE
+Root: HKCU; Subkey: "Environment"; ValueType:string; ValueName: "RUBYOPT"; ValueData: "-Eutf-8"; Tasks: RUBYOPT
 
 [Icons]
 Name: "{group}\stdlib"; Filename: "{app}\lib\ruby"
