@@ -17,6 +17,7 @@ AppVersion=<%= ver %>
 AppPublisherURL=https://github.com/gromnitsky/ruby-mswin64
 ;; windows 7 sp1
 MinVersion=6.1.7601
+ArchitecturesAllowed=x64
 AppId={#AppId}
 
 WizardStyle=classic
