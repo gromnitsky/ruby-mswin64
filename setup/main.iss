@@ -60,6 +60,7 @@ Source: "<%= prefix('include/*') %>"; DestDir: "{app}/include"; Flags: recursesu
 Source: "<%= prefix('share/*') %>"; DestDir: "{app}/share"; Flags: recursesubdirs; Components: help
 Source: "<%= prefix('sample/*') %>"; DestDir: "{app}/sample"; Flags: recursesubdirs; Components: help
 Source: "<%= prefix('man/*') %>"; DestDir: "{app}/man"; Flags: recursesubdirs; Components: help
+Source: "<%= prefix('rdoc/*') %>"; DestDir: "{app}/rdoc"; Flags: recursesubdirs; Components: help
 Source: "vc_redist.x64.exe"; DestDir: {app}; Flags: nocompression
 
 [Run]
@@ -79,7 +80,7 @@ Name: "{group}\man\<%= File.basename f, '.html' %>"; Filename: "{app}\man\<%= Fi
 <% end %>
 Name: "{group}\Interactive Ruby console (irb)"; Filename: "{app}\bin\irb.cmd"; WorkingDir: {%USERPROFILE}
 Name: "{group}\API reference console (ri)"; Filename: "{app}\bin\ri.cmd"
-Name: "{group}\API reference"; Filename: "{app}\share\rdoc\index.html"
+Name: "{group}\API reference"; Filename: "{app}\rdoc\index.html"
 Name: "{group}\web\Bundler"; Filename: https://bundler.io/docs.html
 Name: "{group}\web\Changelog"; Filename: https://rubyreferences.github.io/rubychanges/<%= ver_mm %>.html
 Name: "{group}\web\Rakefile format"; Filename: https://github.com/ruby/rake/blob/master/doc/rakefile.rdoc

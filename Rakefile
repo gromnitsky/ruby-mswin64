@@ -66,7 +66,7 @@ file out('ruby.build') => [out('vcpkg.deps'), out('ruby.unpack')] do |t|
 end
 
 file out('rdoc.darkfish') => out('ruby.build') do |t|
-  to = wj install_prefix, 'share/rdoc'
+  to = wj install_prefix, 'rdoc'
   cd out('ruby') do
     # rdoc `--root` option doesn't work since (at least) 2015
     sh 'rdoc', '-o', to,  '-m', 'README.md'
