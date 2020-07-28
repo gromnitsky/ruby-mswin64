@@ -65,8 +65,17 @@ file out('ruby.build') => [out('vcpkg.deps'), out('ruby.unpack')] do |t|
   touch t.name
 end
 
+file out('rdoc.darkfish') => out('ruby.build') do |t|
+  to = wj install_prefix, 'share/rdoc'
+  cd out('ruby') do
+    # rdoc `--root` option doesn't work since (at least) 2015
+    sh 'rdoc', '-o', to,  '-m', 'README.md'
+  end
+  touch t.name
+end
+
 # copy samples; convert man pages to html
-file out('ruby.build.post') => [out('ruby.build'), out('mdocml.unzip')] do |t|
+file out('ruby.build.post') => [out('rdoc.darkfish'), out('mdocml.unzip')] do |t|
   rm_rf File.join install_prefix, 'share/man'
   rm_rf File.join install_prefix, 'share/doc'
   cp_r out('ruby/sample'), install_prefix

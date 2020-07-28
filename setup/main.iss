@@ -78,12 +78,13 @@ Name: "{group}\man\<%= File.basename f, '.html' %>"; Filename: "{app}\man\<%= Fi
 <% end %>
 Name: "{group}\Interactive Ruby console (irb)"; Filename: "{app}\bin\irb.cmd"; WorkingDir: {%USERPROFILE}
 Name: "{group}\API reference console (ri)"; Filename: "{app}\bin\ri.cmd"
+Name: "{group}\API reference"; Filename: "{app}\share\rdoc\index.html"
 Name: "{group}\web\Bundler"; Filename: https://bundler.io/docs.html
 Name: "{group}\web\Changelog"; Filename: https://rubyreferences.github.io/rubychanges/<%= ver_mm %>.html
 Name: "{group}\web\Rakefile format"; Filename: https://github.com/ruby/rake/blob/master/doc/rakefile.rdoc
 Name: "{group}\web\Reddit"; Filename: https://old.reddit.com/r/ruby/
 Name: "{group}\web\Rubyfu"; Filename: https://rubyfu.net/
-Name: "{group}\web\The official API documentation"; Filename: https://docs.ruby-lang.org/en/<%= ver_mm0 %>/
+Name: "{group}\web\The official API documentation"; Filename: https://docs.ruby-lang.org/en/
 Name: "{group}\web\minitest"; Filename: http://docs.seattlerb.org/minitest/
 
 [Code]
