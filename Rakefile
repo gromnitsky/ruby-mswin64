@@ -123,7 +123,8 @@ end
 setup = install_prefix + "-#{$conf["release"]}.exe"
 file setup => [out('main.iss'), out('modpath.iss'), out('vc_redist.x64.exe'),
                out('ruby.build.post'), out('license.txt')] do |t|
-  sh "iscc", '/Q', '/F'+File.basename(t.name, '.exe'), t.prerequisites.first
+  sh "iscc", "/DCOMPRESSION=#{ENV['compression'] || 'lzma2/max'}", '/Q',
+     '/F'+File.basename(t.name, '.exe'), t.prerequisites.first
 end
 task :setup => setup
 

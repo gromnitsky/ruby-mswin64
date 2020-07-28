@@ -30,7 +30,7 @@ DefaultDirName={autopf}\ruby-mswin64-<%= ver %>
 DefaultGroupName=ruby-mswin64 <%= ver %>
 DisableProgramGroupPage=yes
 LicenseFile=license.txt
-Compression=<%= ENV['compression'] || 'lzma2/max' %>
+Compression={#COMPRESSION}
 ;; Tell Windows Explorer to reload the environment after we modified env vars
 ChangesEnvironment=yes
 ;; put .exe alongside .iss
