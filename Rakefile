@@ -31,7 +31,10 @@ end
 # compile vcpkg.exe
 task "vcpkg-configure" => out('vcpkg.configure')
 file out('vcpkg.configure') => out('vcpkg.unpack') do |t|
+  cp 'vcpkg/openssl-1.1.1d-relocation.patch',
+     out('vcpkg/ports/openssl-windows/')
   cd out('vcpkg') do
+    sh 'patch', '-b', '-p1', '-i', File.join(__dir__, 'vcpkg/openssl.patch')
     sh 'powershell', '-NoProfile', '-ExecutionPolicy', 'Bypass',
        File.join('scripts', 'bootstrap.ps1'), '-disableMetrics'
   end
@@ -74,8 +77,11 @@ file out('rdoc.darkfish') => out('ruby.build') do |t|
   touch t.name
 end
 
-# copy samples; convert man pages to html
+# copy libs, cert, samples; convert man pages to html
 file out('ruby.build.post') => [out('rdoc.darkfish'), out('mdocml.unzip')] do |t|
+  cp Dir.glob(out('vcpkg/installed/x64-windows/lib/*.lib')),
+     File.join(install_prefix, 'lib/')
+  cp 'cacert.pem', File.join(install_prefix, 'cert.pem')
   rm_rf File.join install_prefix, 'share/man'
   rm_rf File.join install_prefix, 'share/doc'
   cp_r out('ruby/sample'), install_prefix

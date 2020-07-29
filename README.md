@@ -20,6 +20,7 @@ Examples: http://gromnitsky.users.sourceforge.net/ruby/mswin64/
 
 * Win7 sp1 x64 or newer.
 * VS 2019 (the 'community' edition will suffice)
+* `scoop install git patch`
 * Ruby (grab a zip from the link above, unpack it somewhere & add its
   `bin` dir to PATH)
 * `scoop install inno-setup` (optional, only if you plan making an
@@ -46,13 +47,13 @@ The results should be in `_out` dir, e.g.,
 
 ## Caveats
 
-* The included openssl doesn't use the windows certificate
-  store. Therefore to be able to make TLS requests, fetch [The Mozilla
-  CA certificate store in PEM format][] and set `SSL_CERT_FILE` env
-  var with a full path to the file.
+* The included openssl doesn't use the windows certificate store,
+  hence, we ship [The Mozilla CA certificate store in PEM format][] as
+  $install_prefix/cert.pem.
 
-  Alternatively, use a technique described in [net_http_ssl_fix][] gem
-  on a per-project basis.
+  To override this, set `SSL_CERT_FILE` env var with a full path to a
+  new .pem file or, alternatively, use a technique described in
+  [net_http_ssl_fix][] gem on a per-project basis.
 
 * dbm & gdbm extensions are absent.
 

@@ -44,7 +44,6 @@ Name: "custom"; Description: "Custom installation"; Flags: iscustom
 [Tasks]
 Name: modifypath; Description: &Add ruby.exe, irb.cmd, &&c to PATH.
 Name: RUBYOPT; Description: &Enable UTF-8 by default for `Encoding.default_external` via setting RUBYOPT env var to `-Eutf-8` (highly recomended).
-Name: SSL_CERT_FILE; Description: &Install the Mozilla CA certificate store. This will NOT interfere with the Windows certificate store. If you uncheck this, expect certificate check errors when opening a TLS connection in Ruby.
 
 [Components]
 Name: "program"; Description: "Essentials"; Types: full custom; Flags: fixed
@@ -53,10 +52,13 @@ Name: "help"; Description: "API reference, man pages, samples"; Types: full cust
 
 [Files]
 Source: "license.txt"; DestDir: "{app}"; Components: program
-Source: "<%= prefix('lib/*') %>"; DestDir: "{app}/lib"; Flags: recursesubdirs; Components: program
-Source: "<%= ENV['src'] %>/cacert.pem"; DestDir: "{app}\etc"; Components: program; Tasks: SSL_CERT_FILE
+Source: "<%= prefix('lib/ruby/*') %>"; DestDir: "{app}/lib/ruby"; Flags: recursesubdirs; Components: program
+Source: "<%= prefix('*.pem') %>"; DestDir: "{app}"; Components: program
 Source: "<%= prefix('bin/*') %>"; DestDir: "{app}/bin"; Flags: recursesubdirs; Components: program
+
 Source: "<%= prefix('include/*') %>"; DestDir: "{app}/include"; Flags: recursesubdirs; Components: headers
+Source: "<%= prefix('lib/*.lib') %>"; DestDir: "{app}/lib"; Flags: recursesubdirs; Components: headers
+
 Source: "<%= prefix('share/*') %>"; DestDir: "{app}/share"; Flags: recursesubdirs; Components: help
 Source: "<%= prefix('sample/*') %>"; DestDir: "{app}/sample"; Flags: recursesubdirs; Components: help
 Source: "<%= prefix('man/*') %>"; DestDir: "{app}/man"; Flags: recursesubdirs; Components: help
@@ -68,7 +70,6 @@ Filename: {app}\vc_redist.x64.exe; Parameters: "/passive"; \
           StatusMsg: "Installing MS Visual C++ Redistributable..."
 
 [Registry]
-Root: HKCU; Subkey: "Environment"; ValueType:string; ValueName: "SSL_CERT_FILE"; ValueData: "{app}\etc\cacert.pem"; Flags: uninsdeletevalue; Tasks: SSL_CERT_FILE
 Root: HKCU; Subkey: "Environment"; ValueType:string; ValueName: "RUBYOPT"; ValueData: "-Eutf-8"; Tasks: RUBYOPT
 
 [Icons]
