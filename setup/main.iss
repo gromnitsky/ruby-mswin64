@@ -30,7 +30,7 @@ DefaultDirName={autopf}\ruby-mswin64-<%= ver %>
 ;; start menu dir
 DefaultGroupName=ruby-mswin64 <%= ver %>
 DisableProgramGroupPage=yes
-LicenseFile=license.txt
+LicenseFile=<%= prefix('license.txt') %>
 Compression={#COMPRESSION}
 ;; Tell Windows Explorer to reload the environment after we modified env vars
 ChangesEnvironment=yes
@@ -51,7 +51,7 @@ Name: "headers"; Description: "Headers"; Types: full custom
 Name: "help"; Description: "API reference, man pages, samples"; Types: full custom
 
 [Files]
-Source: "license.txt"; DestDir: "{app}"; Components: program
+Source: "<%= prefix('license.txt') %>"; DestDir: "{app}"; Components: program
 Source: "<%= prefix('lib/ruby/*') %>"; DestDir: "{app}/lib/ruby"; Flags: recursesubdirs; Components: program
 Source: "<%= prefix('*.pem') %>"; DestDir: "{app}"; Components: program
 Source: "<%= prefix('bin/*') %>"; DestDir: "{app}/bin"; Flags: recursesubdirs; Components: program
@@ -73,15 +73,16 @@ Filename: {app}\vc_redist.x64.exe; Parameters: "/passive"; \
 Root: HKCU; Subkey: "Environment"; ValueType:string; ValueName: "RUBYOPT"; ValueData: "-Eutf-8"; Tasks: RUBYOPT
 
 [Icons]
-Name: "{group}\stdlib"; Filename: "{app}\lib\ruby"
+Name: "{group}\API reference console (ri)"; Filename: "{app}\bin\ri.cmd"; Components: help
 Name: "{group}\samples"; Filename: "{app}\sample"; Components: help
 ;; each man page is a separate shortcut
 <% Dir.glob(File.join ENV['out'], prefix('man/*.html')).each do |f| %>
 Name: "{group}\man\<%= File.basename f, '.html' %>"; Filename: "{app}\man\<%= File.basename f %>"; Components: help
 <% end %>
+Name: "{group}\API reference"; Filename: "{app}\rdoc\index.html"; Components: help
+
 Name: "{group}\Interactive Ruby console (irb)"; Filename: "{app}\bin\irb.cmd"; WorkingDir: {%USERPROFILE}
-Name: "{group}\API reference console (ri)"; Filename: "{app}\bin\ri.cmd"
-Name: "{group}\API reference"; Filename: "{app}\rdoc\index.html"
+Name: "{group}\stdlib"; Filename: "{app}\lib\ruby"
 Name: "{group}\web\Bundler"; Filename: https://bundler.io/docs.html
 Name: "{group}\web\Changelog"; Filename: https://rubyreferences.github.io/rubychanges/<%= ver_mm %>.html
 Name: "{group}\web\Rakefile format"; Filename: https://github.com/ruby/rake/blob/master/doc/rakefile.rdoc

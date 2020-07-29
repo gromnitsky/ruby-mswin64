@@ -3,6 +3,7 @@ require 'yaml'
 $conf = YAML.load_file(ENV['conf'] || File.join(__dir__, 'default.yaml'))
 def out f=''; File.join (ENV['out'] || "_out/ruby-#{$conf["ver"]}"), f; end
 install_prefix = out "ruby-#{$conf["ver"]}"
+def ip f; File.join out("ruby-#{$conf["ver"]}"), f; end
 
 rule '.tar.gz' do |t|
   fetch $conf["tarballs"][File.basename t.name]["url"], t.name
@@ -77,19 +78,24 @@ file out('rdoc.darkfish') => out('ruby.build') do |t|
   touch t.name
 end
 
-# copy libs, cert, samples; convert man pages to html
-file out('ruby.build.post') => [out('rdoc.darkfish'), out('mdocml.unzip')] do |t|
-  cp Dir.glob(out('vcpkg/installed/x64-windows/lib/*.lib')),
-     File.join(install_prefix, 'lib/')
-  cp 'cacert.pem', File.join(install_prefix, 'cert.pem')
-  rm_rf File.join install_prefix, 'share/man'
-  rm_rf File.join install_prefix, 'share/doc'
+file ip('cert.pem') do |t|
+  fetch $conf["tarballs"][File.basename t.name]["url"], t.name
+end
+
+# copy stuff; convert man pages to html
+file out('ruby.build.post') => [
+       out('rdoc.darkfish'), out('mdocml.unzip'), ip('cert.pem'),
+       ip('license.txt')
+] do |t|
+  cp Dir.glob(out('vcpkg/installed/x64-windows/lib/*.lib')), ip('lib')
+  rm_rf ip 'share/man'
+  rm_rf ip 'share/doc'
   cp_r out('ruby/sample'), install_prefix
 
   # the reason this is not a rule-based, but a stupid loop, is that
   # after first run, the ruby src is not downloaded yet, hence rake
   # won't find any .1 files
-  to = File.join(install_prefix, 'man')
+  to = ip 'man'
   mkdir_p to
   ENV['PATH'] += ';'+out('mdocml-1.13.1-win32-embedeo-02/bin')
   Dir.glob(out('ruby/man/*.[1-9]')).each do |f|
@@ -109,7 +115,7 @@ file zip => out('ruby.build.post') do |t|
 end
 task :default => zip
 
-file out('license.txt') => ['setup/license_prefix.txt', out('ruby.unpack')] do |t|
+file ip('license.txt') => ['setup/license_prefix.txt', out('ruby.build')] do |t|
   ENV['out'] = out()
   sh "erb -T- #{t.prerequisites.first} > #{t.name}"
 end
@@ -128,7 +134,7 @@ end
 
 setup = install_prefix + "-#{$conf["release"]}.exe"
 file setup => [out('main.iss'), out('modpath.iss'), out('vc_redist.x64.exe'),
-               out('ruby.build.post'), out('license.txt')] do |t|
+               out('ruby.build.post')] do |t|
   sh "iscc", "/DCOMPRESSION=#{ENV['compression'] || 'lzma2/max'}", '/Q',
      '/F'+File.basename(t.name, '.exe'), t.prerequisites.first
 end
@@ -143,11 +149,6 @@ end
 require 'open-uri'
 require 'rubygems/package'
 require 'digest/sha1'
-
-# openssl for windows doesn't use the windows certificate store!
-#
-# wget https://curl.haxx.se/ca/cacert.pem
-ENV['SSL_CERT_FILE'] = File.join __dir__, 'cacert.pem'
 
 def fetch from, to
   puts "fetch #{from} to `#{to}`" if verbose
