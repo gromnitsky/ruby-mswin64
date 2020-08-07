@@ -88,6 +88,7 @@ file out('ruby.build.post') => [
        ip('license.txt')
 ] do |t|
   cp Dir.glob(out('vcpkg/installed/x64-windows/lib/*.lib')), ip('lib')
+  cp_r Dir.glob(out 'vcpkg/installed/x64-windows/include/*'), ip('include')
   rm_rf ip 'share/man'
   rm_rf ip 'share/doc'
   cp_r out('ruby/sample'), install_prefix

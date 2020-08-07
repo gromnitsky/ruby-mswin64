@@ -15,4 +15,4 @@ tarballs:
     url: https://curl.haxx.se/ca/cacert.pem
     sha1: 1057b838cf913c5e188e6ec6697b6f2b49637c29
 ver: 2.7.1p83
-release: 4
+release: 5
