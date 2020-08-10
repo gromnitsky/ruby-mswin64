@@ -55,6 +55,8 @@ The results should be in `_out` dir, e.g.,
   new .pem file or, alternatively, use a technique described in
   [net_http_ssl_fix][] gem on a per-project basis.
 
+* File ops throw on exceeding the [MAX_PATH][] limit.
+
 * dbm & gdbm extensions are absent.
 
 * At the time of writing, nokogiri gem, unfortunately, does not
@@ -64,6 +66,7 @@ The results should be in `_out` dir, e.g.,
 
 [The Mozilla CA certificate store in PEM format]: https://curl.haxx.se/ca/cacert.pem
 [net_http_ssl_fix]: https://github.com/liveeditor/net_http_ssl_fix
+[MAX_PATH]: https://docs.microsoft.com/en-us/windows/win32/fileio/naming-a-file
 
 ## Hints
 
