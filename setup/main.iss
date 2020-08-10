@@ -65,6 +65,10 @@ Source: "<%= prefix('man/*') %>"; DestDir: "{app}/man"; Flags: recursesubdirs; C
 Source: "<%= prefix('rdoc/*') %>"; DestDir: "{app}/rdoc"; Flags: recursesubdirs; Components: help
 Source: "vc_redist.x64.exe"; DestDir: {app}; Flags: nocompression
 
+[UninstallDelete]
+Type: filesandordirs; Name: "{app}/bin"
+Type: filesandordirs; Name: "{app}/lib/ruby/gems"
+
 [Run]
 Filename: {app}\vc_redist.x64.exe; Parameters: "/passive"; \
           StatusMsg: "Installing MS Visual C++ Redistributable..."
